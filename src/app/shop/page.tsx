@@ -161,43 +161,43 @@ export default function ShopPage() {
       {/* Modern Glassmorphism Navbar */}
       <header className="sticky top-0 z-50">
         <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-blue-50/90 to-purple-50/80 backdrop-blur-xl border-b border-white/20"></div>
-        <div className="relative max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-8">
+        <div className="relative max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-8">
             
             {/* Logo/Brand */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <span className="text-white font-bold text-lg">⚡</span>
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                <span className="text-white font-bold text-base sm:text-lg">⚡</span>
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-purple-500 transition-all duration-300">Shop</span>
+              <span className="font-bold text-lg sm:text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-purple-500 transition-all duration-300 hidden xs:block">Shop</span>
             </Link>
 
-            {/* Search Bar - Glassmorphism */}
+            {/* Search Bar - Mobile Optimized */}
             <div className="flex-1 max-w-2xl">
               <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-sm group-focus-within:blur-none transition-all duration-300"></div>
-                <div className="relative bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl shadow-lg">
-                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-500/70" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl sm:rounded-2xl blur-sm group-focus-within:blur-none transition-all duration-300"></div>
+                <div className="relative bg-white/40 backdrop-blur-md border border-white/30 rounded-xl sm:rounded-2xl shadow-lg">
+                  <Search className="absolute left-3 sm:left-4 top-1/2 h-4 w-4 sm:h-5 sm:w-5 -translate-y-1/2 text-blue-500/70" />
                   <input
                     type="text"
-                    placeholder="Search for amazing products..."
+                    placeholder="Search products..."
                     value={selectedFilters.search}
                     onChange={(e) => setSelectedFilters(prev => ({ ...prev, search: e.target.value }))}
-                    className="w-full pl-12 pr-6 py-3.5 bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none text-sm font-medium"
+                    className="w-full pl-10 sm:pl-12 pr-4 sm:pr-6 py-2.5 sm:py-3.5 bg-transparent text-gray-800 placeholder-gray-500 focus:outline-none text-sm font-medium"
                   />
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                  <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
+            {/* Action Buttons - Mobile Optimized */}
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
               {/* Wishlist Button */}
-              <button className="group relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-red-500/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
-                <div className="relative flex items-center gap-2 bg-white/30 backdrop-blur-md border border-white/30 rounded-xl px-4 py-2.5 hover:bg-white/40 transition-all duration-300 shadow-lg">
-                  <Heart className="h-5 w-5 text-pink-500 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="hidden sm:block text-sm font-medium text-gray-700">Wishlist</span>
+              <button className="group relative hidden sm:flex">
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-red-500/20 rounded-lg sm:rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
+                <div className="relative flex items-center gap-2 bg-white/30 backdrop-blur-md border border-white/30 rounded-lg sm:rounded-xl px-2 sm:px-4 py-2 sm:py-2.5 hover:bg-white/40 transition-all duration-300 shadow-lg">
+                  <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-pink-500 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="hidden md:block text-sm font-medium text-gray-700">Wishlist</span>
                 </div>
               </button>
 
