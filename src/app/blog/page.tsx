@@ -40,7 +40,7 @@ interface BlogPost {
 interface Category {
   id: string;
   name: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   count: number;
   color: string;
 }

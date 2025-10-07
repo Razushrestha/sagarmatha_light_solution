@@ -24,7 +24,7 @@ interface ContactForm {
 }
 
 interface ContactInfo {
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   details: string[];
   color: string;

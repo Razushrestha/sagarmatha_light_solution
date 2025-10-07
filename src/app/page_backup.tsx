@@ -640,6 +640,14 @@ export default function HomePage() {
             </svg>
             <span className="text-xs font-medium">Home</span>
           </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+            </svg>
+            <span className="text-xs font-medium">Home</span>
+          </Link>
           
           <Link href="/shop" className="flex flex-col items-center space-y-1 text-muted-ink min-w-0 flex-1">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
