@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Montserrat } from "next/font/google";
 import "./globals.css";
+import ClientProviders from "../components/ClientProviders";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className={`${poppins.variable} ${montserrat.variable} antialiased`}>
-        {children}
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

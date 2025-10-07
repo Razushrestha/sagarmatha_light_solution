@@ -16,6 +16,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { productCatalog } from "../../../data/products";
+import { useWishlist } from "../../../contexts/WishlistContext";
 
 type Review = {
   id: number;
@@ -73,6 +74,7 @@ export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const productId = Number(params?.id);
+  const { isInWishlist, toggleWishlist: globalToggleWishlist } = useWishlist();
 
   const product = useMemo(() => productCatalog.find(item => item.id === productId), [productId]);
 
@@ -85,7 +87,6 @@ export default function ProductDetailPage() {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [showToast, setShowToast] = useState(false);
 
@@ -120,8 +121,9 @@ export default function ProductDetailPage() {
 
   const gallery = product.gallery && product.gallery.length > 0 ? product.gallery : [product.image];
   const stockLabel = product.inStock ? "In stock • Ready to ship" : "Currently unavailable";
+  const isWishlisted = isInWishlist(product.id);
 
-  const toggleWishlist = () => setIsWishlisted(prev => !prev);
+  const toggleWishlist = () => globalToggleWishlist(product);
 
   const adjustQuantity = (delta: number) => {
     setQuantity(prev => Math.max(1, prev + delta));

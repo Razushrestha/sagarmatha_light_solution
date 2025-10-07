@@ -3,12 +3,39 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Heart } from 'lucide-react';
 import { productCatalog } from '../data/products';
+import { useWishlist } from '../contexts/WishlistContext';
 
 export default function HomePage() {
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isInWishlist, toggleWishlist, getWishlistCount } = useWishlist();
+
+  // Handle wishlist navigation
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('Wishlist clicked!'); // Debug log
+    router.push('/wishlist');
+  };
+
+  // Handle mobile menu toggle
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  // Handle search functionality
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      router.push(`/shop?search=${encodeURIComponent(query.trim())}`);
+      setSearchQuery('');
+      setShowSuggestions(false);
+    }
+  };
 
   const bannerSlides = [
     {
@@ -91,6 +118,20 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [bannerSlides.length]);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobileMenuOpen && !(event.target as Element).closest('#mobile-menu')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isMobileMenuOpen]);
+
   return (
     <div className="min-h-screen bg-cream pb-24 md:pb-0 text-ink">
       {/* Luxurious Glassmorphism Navbar */}
@@ -122,6 +163,48 @@ export default function HomePage() {
                 </div>
               </Link>
 
+              {/* Desktop Navigation Menu */}
+              <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+                <Link href="/" className="group relative px-3 xl:px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-amber-600 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-100/50 to-orange-100/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                  <span className="relative">Home</span>
+                </Link>
+                <Link href="/shop" className="group relative px-3 xl:px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-amber-600 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-100/50 to-orange-100/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                  <span className="relative">Shop</span>
+                </Link>
+                <div className="group relative">
+                  <button className="group relative px-3 xl:px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-amber-600 transition-all duration-300 flex items-center gap-1">
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-100/50 to-orange-100/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                    <span className="relative">Categories</span>
+                    <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {/* Categories Dropdown - will be visible on hover */}
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white/90 backdrop-blur-xl border border-white/40 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <div className="p-2">
+                      <Link href="/shop?category=electrical" className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-all duration-200">
+                        ⚡ Electrical Components
+                      </Link>
+                      <Link href="/shop?category=lighting" className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-all duration-200">
+                        💡 LED Lighting
+                      </Link>
+                      <Link href="/shop?category=tools" className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-all duration-200">
+                        🔧 Professional Tools
+                      </Link>
+                      <Link href="/shop?category=smart" className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition-all duration-200">
+                        🏠 Smart Solutions
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+                <Link href="/contact" className="group relative px-3 xl:px-4 py-2 rounded-xl text-sm font-medium text-gray-700 hover:text-amber-600 transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-100/50 to-orange-100/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                  <span className="relative">Contact</span>
+                </Link>
+              </nav>
+
               {/* Enhanced Search Bar with Mobile Support */}
               <div className="flex-1 max-w-2xl">
                 <div className="relative w-full group">
@@ -136,8 +219,21 @@ export default function HomePage() {
                         setShowSuggestions(e.target.value.length > 0);
                       }}
                       onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                      className="w-full px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 pl-10 sm:pl-12 md:pl-14 pr-3 sm:pr-4 md:pr-6 bg-transparent text-gray-800 placeholder-gray-600 focus:outline-none font-medium text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSearch(searchQuery);
+                        }
+                      }}
+                      className="w-full px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 pl-10 sm:pl-12 md:pl-14 pr-12 sm:pr-14 md:pr-16 bg-transparent text-gray-800 placeholder-gray-600 focus:outline-none font-medium text-sm"
                     />
+                    <button
+                      onClick={() => handleSearch(searchQuery)}
+                      className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 p-1.5 sm:p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+                    >
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </button>
                     <div className="absolute left-3 sm:left-4 md:left-5 top-1/2 transform -translate-y-1/2">
                       <div className="w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                         <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,8 +254,7 @@ export default function HomePage() {
                           <button
                             key={index}
                             onClick={() => {
-                              setSearchQuery(suggestion);
-                              setShowSuggestions(false);
+                              handleSearch(suggestion);
                             }}
                             className="w-full px-3 sm:px-5 py-2.5 sm:py-3 text-left text-sm text-gray-800 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 first:rounded-t-xl sm:first:rounded-t-2xl last:rounded-b-xl sm:last:rounded-b-2xl transition-all duration-200 group active:bg-blue-100/50"
                           >
@@ -174,6 +269,11 @@ export default function HomePage() {
                           </button>
                         ))
                       }
+                      {searchSuggestions.filter(suggestion => suggestion.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                        <div className="px-3 sm:px-5 py-2.5 sm:py-3 text-sm text-gray-500 text-center">
+                          No suggestions found
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -182,18 +282,23 @@ export default function HomePage() {
               {/* Action Buttons with Mobile Optimization */}
               <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
                 {/* Wishlist Button with Floating Hearts */}
-                <button className="group relative hidden sm:block">
+                <Link href="/wishlist" onClick={handleWishlistClick} className="group relative hidden sm:block">
                   <div className="absolute inset-0 bg-gradient-to-r from-pink-400/30 to-red-400/30 rounded-lg sm:rounded-xl blur-sm group-hover:blur-none group-hover:from-pink-500/40 group-hover:to-red-500/40 transition-all duration-300"></div>
                   <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/25 backdrop-blur-xl border border-white/30 rounded-lg sm:rounded-xl hover:bg-white/35 transition-all duration-300 shadow-lg group-hover:shadow-pink-500/25 group-hover:-translate-y-1">
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 text-pink-500 group-hover:scale-125 group-hover:text-pink-600 transition-all duration-300" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
+                    {getWishlistCount() > 0 && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg border border-white">
+                        {getWishlistCount()}
+                      </div>
+                    )}
                     <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-pink-500 rounded-full animate-bounce opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
-                </button>
+                </Link>
 
                 {/* Enhanced Cart Button with Floating Badge */}
-                <Link href="/shop" className="group relative">
+                <Link href="/cart" className="group relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/30 via-teal-400/30 to-cyan-400/30 rounded-lg sm:rounded-xl blur-sm group-hover:blur-none group-hover:from-emerald-500/40 group-hover:to-cyan-500/40 transition-all duration-300"></div>
                   <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg sm:rounded-xl shadow-lg group-hover:shadow-emerald-500/50 group-hover:-translate-y-1 group-hover:from-emerald-600 group-hover:to-teal-600 transition-all duration-300">
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:scale-125 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,22 +309,24 @@ export default function HomePage() {
                 </Link>
 
                 {/* Profile Button with Glow */}
-                {/* Profile Button */}
-                <button className="group relative hidden sm:block">
+                <Link href="/dashboard" className="group relative hidden sm:block">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-indigo-400/30 rounded-lg sm:rounded-xl blur-sm group-hover:blur-none group-hover:from-blue-500/40 group-hover:to-indigo-500/40 transition-all duration-300"></div>
                   <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/25 backdrop-blur-xl border border-white/30 rounded-lg sm:rounded-xl hover:bg-white/35 transition-all duration-300 shadow-lg group-hover:shadow-blue-500/25 group-hover:-translate-y-1">
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 group-hover:scale-125 group-hover:text-blue-600 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                </button>
+                </Link>
 
-                {/* Mobile Menu Button */}
-                <button className="group relative md:hidden">
+                {/* Enhanced Mobile Menu Button */}
+                <button 
+                  onClick={toggleMobileMenu}
+                  className="group relative lg:hidden"
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-400/30 to-gray-500/30 rounded-lg blur-sm group-hover:blur-none transition-all duration-300"></div>
                   <div className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/25 backdrop-blur-xl border border-white/30 rounded-lg hover:bg-white/35 transition-all duration-300 shadow-lg group-hover:-translate-y-1">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 group-hover:scale-125 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    <svg className={`w-4 h-4 sm:w-5 sm:h-5 text-gray-700 group-hover:scale-125 transition-all duration-300 ${isMobileMenuOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
                     </svg>
                   </div>
                 </button>
@@ -228,6 +335,125 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+          
+          {/* Menu Content */}
+          <div id="mobile-menu" className="fixed top-0 left-0 right-0 z-40 lg:hidden">
+            <div className="bg-white/95 backdrop-blur-xl border-b border-cream shadow-2xl" style={{ marginTop: '80px' }}>
+              <div className="max-w-7xl mx-auto px-4 py-6">
+              <nav className="space-y-4">
+                <Link 
+                  href="/" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-gray-700 group-hover:text-amber-600">Home</span>
+                </Link>
+                
+                <Link 
+                  href="/shop" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-gray-700 group-hover:text-amber-600">Shop All Products</span>
+                </Link>
+
+                <div className="space-y-2">
+                  <div className="px-3 py-2">
+                    <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Categories</span>
+                  </div>
+                  <Link 
+                    href="/shop?category=electrical" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group ml-4"
+                  >
+                    <span className="text-2xl">⚡</span>
+                    <span className="font-medium text-gray-700 group-hover:text-amber-600">Electrical Components</span>
+                  </Link>
+                  <Link 
+                    href="/shop?category=lighting" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group ml-4"
+                  >
+                    <span className="text-2xl">💡</span>
+                    <span className="font-medium text-gray-700 group-hover:text-amber-600">LED Lighting</span>
+                  </Link>
+                  <Link 
+                    href="/shop?category=tools" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group ml-4"
+                  >
+                    <span className="text-2xl">🔧</span>
+                    <span className="font-medium text-gray-700 group-hover:text-amber-600">Professional Tools</span>
+                  </Link>
+                </div>
+
+                <Link 
+                  href="/wishlist" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-red-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-gray-700 group-hover:text-amber-600">Wishlist</span>
+                  {getWishlistCount() > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">{getWishlistCount()}</span>
+                  )}
+                </Link>
+
+                <Link 
+                  href="/cart" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m4.5-5h6" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-gray-700 group-hover:text-amber-600">Shopping Cart</span>
+                  <span className="bg-emerald-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                </Link>
+
+                <Link 
+                  href="/contact" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-amber-50 transition-all duration-300 group"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-gray-700 group-hover:text-amber-600">Contact Us</span>
+                </Link>
+              </nav>
+            </div>
+          </div>
+        </div>
+        </>
+      )}
 
       {/* Hero Banner with Soft Cream Glow */}
       <section className="relative overflow-hidden">
@@ -434,17 +660,33 @@ export default function HomePage() {
                   </div>
                 </Link>
                 
-                {/* Simple add to cart button */}
+                {/* Action buttons with wishlist and add to cart */}
                 <div className="p-4 pt-0">
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    className="w-full bg-gray-900 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
-                  >
-                    Add to Cart
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(product);
+                      }}
+                      className={`p-2 rounded-md border transition-colors duration-200 ${
+                        isInWishlist(product.id) 
+                          ? 'bg-red-50 border-red-200 text-red-600' 
+                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="flex-1 bg-gray-900 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -562,22 +804,38 @@ export default function HomePage() {
                   </div>
                 </Link>
                 
-                {/* Simple add to cart button */}
+                {/* Action buttons with wishlist and add to cart */}
                 <div className="p-4 pt-0">
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    disabled={!product.inStock}
-                    className={`w-full py-2 px-4 rounded-md text-sm font-medium transition-colors duration-200 ${
-                      product.inStock 
-                        ? 'bg-gray-900 text-white hover:bg-gray-800' 
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(product);
+                      }}
+                      className={`p-2 rounded-md border transition-colors duration-200 ${
+                        isInWishlist(product.id) 
+                          ? 'bg-red-50 border-red-200 text-red-600' 
+                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      disabled={!product.inStock}
+                      className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors duration-200 ${
+                        product.inStock 
+                          ? 'bg-gray-900 text-white hover:bg-gray-800' 
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -710,14 +968,24 @@ export default function HomePage() {
             <span className="text-xs font-medium">Search</span>
           </button>
           
-          <button className="flex flex-col items-center space-y-1 text-muted-ink relative min-w-0 flex-1 py-2 px-1 rounded-lg active:bg-gray-100 transition-colors">
+          <Link 
+            href="/wishlist" 
+            onClick={handleWishlistClick}
+            className="flex flex-col items-center space-y-1 text-muted-ink relative min-w-0 flex-1 py-2 px-1 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all duration-200 touch-manipulation"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+          >
             <div className="relative">
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
+              {getWishlistCount() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-semibold">
+                  {getWishlistCount()}
+                </span>
+              )}
             </div>
             <span className="text-xs font-medium">Wishlist</span>
-          </button>
+          </Link>
           
           <Link href="/cart" className="flex flex-col items-center space-y-1 text-muted-ink relative min-w-0 flex-1 py-2 px-1 rounded-lg active:bg-gray-100 transition-colors">
             <div className="relative">

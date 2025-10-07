@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, Filter, Star, Grid, List, Heart, ShoppingCart } from "lucide-react";
 import { productCatalog, ProductItem } from "../../data/products";
+import { useWishlist } from "../../contexts/WishlistContext";
 
 type CategoryId = 'all' | ProductItem['category'];
 type SortValue = 'featured' | 'price-low-high' | 'price-high-low' | 'rating' | 'newest';
@@ -57,6 +58,7 @@ export default function ShopPage() {
   const [sortBy, setSortBy] = useState<SortValue>('featured');
   const [quickViewProduct, setQuickViewProduct] = useState<ProductItem | null>(null);
   const [cartItems, setCartItems] = useState<ProductItem[]>([]);
+  const { isInWishlist, toggleWishlist, getWishlistCount } = useWishlist();
 
   const categories = useMemo(
     () =>
@@ -193,13 +195,18 @@ export default function ShopPage() {
             {/* Action Buttons - Mobile Optimized */}
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
               {/* Wishlist Button */}
-              <button className="group relative hidden sm:flex">
+              <Link href="/wishlist" className="group relative hidden sm:flex">
                 <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-red-500/20 rounded-lg sm:rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
                 <div className="relative flex items-center gap-2 bg-white/30 backdrop-blur-md border border-white/30 rounded-lg sm:rounded-xl px-2 sm:px-4 py-2 sm:py-2.5 hover:bg-white/40 transition-all duration-300 shadow-lg">
                   <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-pink-500 group-hover:scale-110 transition-transform duration-300" />
                   <span className="hidden md:block text-sm font-medium text-gray-700">Wishlist</span>
+                  {getWishlistCount() > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {getWishlistCount()}
+                    </span>
+                  )}
                 </div>
-              </button>
+              </Link>
 
               {/* Cart Button */}
               <Link href="/cart" className="group relative">
@@ -219,67 +226,77 @@ export default function ShopPage() {
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30"></div>
         <div className="relative max-w-7xl mx-auto px-6 py-8">
-          {/* Page Title with Gradient */}
+          {/* Header Section - All in one line */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent mb-2">
-              Shop All Products
-            </h1>
-            <p className="text-gray-600 text-lg">Discover amazing tools and equipment for your projects</p>
-          </div>
-
-          {/* Filters and Sort */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
-              <div className="relative flex items-center gap-2 bg-white/40 backdrop-blur-md border border-white/30 rounded-xl px-4 py-2.5 hover:bg-white/50 transition-all duration-300 shadow-lg">
-                <Filter className="h-4 w-4 text-blue-500" />
-                <span className="text-sm font-medium text-gray-700">Filters</span>
+            {/* Single Row Layout */}
+            <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-4">
+              {/* Title Section - Compact */}
+              <div className="flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-4">
+                  <h1 className="text-3xl xl:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent">
+                    Shop All Products
+                  </h1>
+                  <p className="text-gray-600 text-sm xl:text-base mt-1 sm:mt-0">Discover amazing tools and equipment for your projects</p>
+                </div>
               </div>
-            </button>
-            
-            <div className="flex items-center gap-4 ml-auto">
-              <span className="text-sm text-gray-600 font-medium">
-                Showing {sortedProducts.length} of {products.length} products
-              </span>
               
-              <div className="flex items-center bg-white/40 backdrop-blur-md border border-white/30 rounded-xl p-1 shadow-lg">
+              {/* Controls Section */}
+              <div className="flex items-center gap-3 flex-shrink-0 flex-wrap sm:flex-nowrap">
+                {/* Filters Button */}
                 <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-all duration-300 ${
-                    viewMode === 'grid' 
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
-                      : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'
-                  }`}
-                >
-                  <Grid className="h-4 w-4" />
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="group relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-sm group-hover:blur-none transition-all duration-300"></div>
+                  <div className="relative flex items-center gap-2 bg-white/40 backdrop-blur-md border border-white/30 rounded-xl px-3 py-2 hover:bg-white/50 transition-all duration-300 shadow-lg">
+                    <Filter className="h-4 w-4 text-blue-500" />
+                    <span className="text-xs font-medium text-gray-700 hidden sm:inline">Filters</span>
+                  </div>
                 </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-all duration-300 ${
-                    viewMode === 'list' 
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
-                      : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'
-                  }`}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-              </div>
+                
+                {/* Product Count */}
+                <span className="text-xs text-gray-600 font-medium whitespace-nowrap hidden lg:inline">
+                  {sortedProducts.length} of {products.length}
+                </span>
+                
+                {/* View Toggle */}
+                <div className="flex items-center bg-white/40 backdrop-blur-md border border-white/30 rounded-xl p-1 shadow-lg">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-1.5 rounded-lg transition-all duration-300 ${
+                      viewMode === 'grid' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
+                        : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'
+                    }`}
+                  >
+                    <Grid className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-1.5 rounded-lg transition-all duration-300 ${
+                      viewMode === 'list' 
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
+                        : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'
+                    }`}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                </div>
 
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-sm group-focus-within:blur-none transition-all duration-300"></div>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortValue)}
-                  className="relative bg-white/40 backdrop-blur-md border border-white/30 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none shadow-lg appearance-none cursor-pointer hover:bg-white/50 transition-all duration-300"
-                >
-                  {sortOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                {/* Sort Dropdown */}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-sm group-focus-within:blur-none transition-all duration-300"></div>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortValue)}
+                    className="relative bg-white/40 backdrop-blur-md border border-white/30 rounded-xl px-3 py-2 text-xs font-medium text-gray-700 focus:outline-none shadow-lg appearance-none cursor-pointer hover:bg-white/50 transition-all duration-300 min-w-[120px]"
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -516,18 +533,34 @@ export default function ShopPage() {
                           )}
                         </div>
 
-                        <button
-                          onClick={() => addToCart(product)}
-                          disabled={!product.inStock}
-                          className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition ${
-                            product.inStock
-                              ? 'bg-primary text-ink hover:shadow-cream'
-                              : 'cursor-not-allowed border border-cream bg-cream text-muted-ink'
-                          }`}
-                        >
-                          <ShoppingCart className="h-4 w-4" />
-                          {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleWishlist(product);
+                            }}
+                            className={`p-2 rounded-full border transition ${
+                              isInWishlist(product.id) 
+                                ? 'bg-red-50 border-red-200 text-red-600' 
+                                : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                          </button>
+                          <button
+                            onClick={() => addToCart(product)}
+                            disabled={!product.inStock}
+                            className={`flex-1 inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition ${
+                              product.inStock
+                                ? 'bg-primary text-ink hover:shadow-cream'
+                                : 'cursor-not-allowed border border-cream bg-cream text-muted-ink'
+                            }`}
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -635,17 +668,33 @@ export default function ShopPage() {
                         )}
                       </div>
 
-                      <button
-                        onClick={() => addToCart(product)}
-                        disabled={!product.inStock}
-                        className={`w-full rounded-full py-3 font-semibold transition ${
-                          product.inStock
-                            ? 'bg-primary text-ink hover:shadow-cream'
-                            : 'cursor-not-allowed border border-cream bg-cream text-muted-ink'
-                        }`}
-                      >
-                        {product.inStock ? '🛒 Add to Cart' : 'Out of Stock'}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleWishlist(product);
+                          }}
+                          className={`p-3 rounded-full border transition ${
+                            isInWishlist(product.id) 
+                              ? 'bg-red-50 border-red-200 text-red-600' 
+                              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
+                        </button>
+                        <button
+                          onClick={() => addToCart(product)}
+                          disabled={!product.inStock}
+                          className={`flex-1 rounded-full py-3 font-semibold transition ${
+                            product.inStock
+                              ? 'bg-primary text-ink hover:shadow-cream'
+                              : 'cursor-not-allowed border border-cream bg-cream text-muted-ink'
+                          }`}
+                        >
+                          {product.inStock ? '🛒 Add to Cart' : 'Out of Stock'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -841,6 +890,20 @@ export default function ShopPage() {
 
                   {/* Action Buttons */}
                   <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(quickViewProduct);
+                      }}
+                      className={`p-4 rounded-full border transition ${
+                        isInWishlist(quickViewProduct.id) 
+                          ? 'bg-red-50 border-red-200 text-red-600' 
+                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Heart className={`h-5 w-5 ${isInWishlist(quickViewProduct.id) ? 'fill-current' : ''}`} />
+                    </button>
                     <button
                       onClick={() => {
                         addToCart(quickViewProduct);
